@@ -9,7 +9,15 @@
 <body>
   <h1>じゃんけん</h1>
   <p th:if="${username}">Hi [[${username}]]</p>
-</body>
+  <a href="/logout">ログアウト</a>
+
+  <div th:if="${entry}">
+    <h2>エントリー</h2>
+    <ul>
+      <li th:each="user : ${entry.users}">[[${user}]]</li>
+    </ul>
+    <p>今[[${entry.userCount}]]人がエントリーしています</p>
+  </div>
 
   <div>
     <a href="/jankengame?hand=Gu">グー</a>
@@ -21,4 +29,6 @@
     相手の手：[[${janken.cpuHand}]]<br>
     結果：[[${janken.result}]]
   </div>
+</body>
+
 </html>
