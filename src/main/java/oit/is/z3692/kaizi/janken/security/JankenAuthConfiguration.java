@@ -19,7 +19,9 @@ public class JankenAuthConfiguration {
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/"))
         .authorizeHttpRequests(authz -> authz
             .requestMatchers("/janken/**").authenticated()
-            .anyRequest().permitAll());
+            .anyRequest().permitAll())
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/*"))
+        .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
     return http.build();
   }
 
