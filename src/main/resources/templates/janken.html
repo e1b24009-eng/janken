@@ -13,6 +13,9 @@
 
   <div th:if="${entry}">
     <h2>エントリー</h2>
+    <ul th:if="${users}">
+      <li th:each="user : ${users}">[[${user.name}]]</li>
+    </ul>
     <ul>
       <li th:each="user : ${entry.users}">[[${user}]]</li>
     </ul>

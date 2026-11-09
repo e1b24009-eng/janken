@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import oit.is.z3692.kaizi.janken.model.Entry;
 import oit.is.z3692.kaizi.janken.model.Janken;
 
+import java.util.ArrayList;
+import oit.is.z3692.kaizi.janken.model.User;
+import oit.is.z3692.kaizi.janken.model.UserMapper;
+
 /**
  * JankenController
  */
@@ -24,6 +28,9 @@ public class JankenController {
   @Autowired
   private Entry entry;
 
+  @Autowired
+  UserMapper userMapper;
+
   /**
    * /jankenへのGETリクエスト：ログインユーザをエントリーに追加し，
    * ログインユーザ名とエントリー中の全ユーザを表示する
@@ -34,6 +41,7 @@ public class JankenController {
     entry.addUser(loginUser);
     model.addAttribute("username", loginUser);
     model.addAttribute("entry", entry);
+    model.addAttribute("users", userMapper.selectAllUsers());
     return "janken.html";
   }
 
