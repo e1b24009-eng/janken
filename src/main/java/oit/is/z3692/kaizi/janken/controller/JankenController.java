@@ -51,6 +51,18 @@ public class JankenController {
   }
 
   /**
+   * /match?id=1 のように対戦相手のidを受け取り，match.htmlに対戦相手を表示する
+   */
+  @GetMapping("/match")
+  public String match(@RequestParam Integer id, Principal prin, ModelMap model) {
+    String loginUser = prin.getName();
+    User opponent = userMapper.selectById(id);
+    model.addAttribute("username", loginUser);
+    model.addAttribute("opponent", opponent);
+    return "match.html";
+  }
+
+  /**
    * フォームからPOSTされたユーザ名を受け取り，janken.htmlに渡す
    */
   @PostMapping("/janken")
