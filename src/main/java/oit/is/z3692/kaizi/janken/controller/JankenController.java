@@ -15,6 +15,7 @@ import oit.is.z3692.kaizi.janken.model.Janken;
 import java.util.ArrayList;
 import oit.is.z3692.kaizi.janken.model.User;
 import oit.is.z3692.kaizi.janken.model.UserMapper;
+import oit.is.z3692.kaizi.janken.model.MatchMapper;
 
 /**
  * JankenController
@@ -31,6 +32,9 @@ public class JankenController {
   @Autowired
   UserMapper userMapper;
 
+  @Autowired
+  MatchMapper matchMapper;
+
   /**
    * /jankenへのGETリクエスト：ログインユーザをエントリーに追加し，
    * ログインユーザ名とエントリー中の全ユーザを表示する
@@ -42,6 +46,7 @@ public class JankenController {
     model.addAttribute("username", loginUser);
     model.addAttribute("entry", entry);
     model.addAttribute("users", userMapper.selectAllUsers());
+    model.addAttribute("matches", matchMapper.selectAllMatches());
     return "janken.html";
   }
 
