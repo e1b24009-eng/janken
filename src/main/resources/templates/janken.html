@@ -22,6 +22,15 @@
     <p>今[[${entry.userCount}]]人がエントリーしています</p>
   </div>
 
+  <div th:if="${activeMatches != null and !#lists.isEmpty(activeMatches)}">
+    <h2>アクティブな試合</h2>
+    <ul>
+      <li th:each="mi : ${activeMatches}">
+        id:[[${mi.id}]] user1:[[${mi.user1}]] vs user2:[[${mi.user2}]]
+      </li>
+    </ul>
+  </div>
+
   <div th:if="${matches}">
     <h2>試合結果</h2>
     <ul>
