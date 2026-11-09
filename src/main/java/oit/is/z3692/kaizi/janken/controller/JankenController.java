@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import oit.is.z3692.kaizi.janken.model.User;
 import oit.is.z3692.kaizi.janken.model.UserMapper;
 import oit.is.z3692.kaizi.janken.model.MatchMapper;
+import oit.is.z3692.kaizi.janken.model.Match;
 
 /**
  * JankenController
@@ -59,6 +60,30 @@ public class JankenController {
     User opponent = userMapper.selectById(id);
     model.addAttribute("username", loginUser);
     model.addAttribute("opponent", opponent);
+    return "match.html";
+  }
+
+  /**
+   * /fight?id=1&hand=Gu のように対戦相手のidと自分の手を受け取り，
+   * CPUと対戦して結果をmatchesテーブルに登録し，match.htmlに表示する
+   */
+  @GetMapping("/fight")
+  public String fight(@RequestParam Integer id, @RequestParam String hand, Principal prin, ModelMap model) {
+    String loginUser = prin.getName();
+    User me = userMapper.selectByName(loginUser);
+    User opponent = userMapper.selectById(id);
+    Janken janken = new Janken(hand); // CPUの手は固定（グー）
+
+    Match match = new Match();
+    match.setUser1(me.getId());
+    match.setUser2(opponent.getId());
+    match.setUser1Hand(hand);
+    match.setUser2Hand(janken.getCpuHand());
+    matchMapper.insertMatch(match);
+
+    model.addAttribute("username", loginUser);
+    model.addAttribute("opponent", opponent);
+    model.addAttribute("janken", janken);
     return "match.html";
   }
 
