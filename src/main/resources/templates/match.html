@@ -9,6 +9,19 @@
 <body>
   <h1>対戦</h1>
   <p th:if="${opponent}">[[${username}]] vs [[${opponent.name}]]</p>
+
+  <div th:if="${opponent}">
+    <a th:href="@{/fight(id=${opponent.id},hand='Gu')}">グー</a>
+    <a th:href="@{/fight(id=${opponent.id},hand='Choki')}">チョキ</a>
+    <a th:href="@{/fight(id=${opponent.id},hand='Pa')}">パー</a>
+  </div>
+
+  <div th:if="${janken}">
+    [[${username}]]の手：[[${janken.playerHand}]]<br>
+    [[${opponent.name}]]の手：[[${janken.cpuHand}]]<br>
+    結果：[[${janken.result}]]
+  </div>
+
   <a href="/janken">もどる</a>
 </body>
 
