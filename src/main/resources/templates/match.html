@@ -10,10 +10,17 @@
   <h1>対戦</h1>
   <p th:if="${opponent}">[[${username}]] vs [[${opponent.name}]]</p>
 
-  <div th:if="${opponent}">
+  <!-- 相手がCPUのときは，その場で対戦する（/fight） -->
+  <div th:if="${opponent != null and opponent.name == 'CPU'}">
     <a th:href="@{/fight(id=${opponent.id},hand='Gu')}">グー</a>
     <a th:href="@{/fight(id=${opponent.id},hand='Choki')}">チョキ</a>
     <a th:href="@{/fight(id=${opponent.id},hand='Pa')}">パー</a>
+  </div>
+  <!-- 相手が人のときは，手を登録して相手を待つ（/wait） -->
+  <div th:if="${opponent != null and opponent.name != 'CPU' and janken == null}">
+    <a th:href="@{/wait(id=${opponent.id},hand='Gu')}">グー</a>
+    <a th:href="@{/wait(id=${opponent.id},hand='Choki')}">チョキ</a>
+    <a th:href="@{/wait(id=${opponent.id},hand='Pa')}">パー</a>
   </div>
 
   <div th:if="${janken}">
