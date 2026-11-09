@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import oit.is.z3692.kaizi.janken.model.Entry;
 import oit.is.z3692.kaizi.janken.model.Janken;
@@ -20,6 +21,7 @@ import oit.is.z3692.kaizi.janken.model.MatchMapper;
 import oit.is.z3692.kaizi.janken.model.Match;
 import oit.is.z3692.kaizi.janken.model.MatchInfo;
 import oit.is.z3692.kaizi.janken.model.MatchInfoMapper;
+import oit.is.z3692.kaizi.janken.service.AsyncKekka;
 
 /**
  * JankenController
@@ -41,6 +43,9 @@ public class JankenController {
 
   @Autowired
   MatchInfoMapper matchInfoMapper;
+
+  @Autowired
+  AsyncKekka asyncKekka;
 
   /**
    * /jankenへのGETリクエスト：ログインユーザをエントリーに追加し，
@@ -127,10 +132,23 @@ public class JankenController {
       match.setIsActive(true);
       matchMapper.insertMatch(match);
       matchInfoMapper.updateInactiveById(waiting.getId());
+      // 後から手を出した側には，その場で結果を表示する
+      model.addAttribute("match", match);
     }
 
     model.addAttribute("username", loginUser);
     return "wait.html";
+  }
+
+  /**
+   * wait.html の EventSource から呼ばれる．待っている側に試合結果を SSE で送る
+   */
+  @GetMapping("/waitresult")
+  public SseEmitter waitResult(Principal prin) {
+    User me = userMapper.selectByName(prin.getName());
+    final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    this.asyncKekka.asyncShowKekka(emitter, me.getId());
+    return emitter;
   }
 
   /**
