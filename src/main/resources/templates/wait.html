@@ -4,11 +4,40 @@
 <head>
   <meta charset="utf-8">
   <title>待機中</title>
+  <!-- 相手を待っているときだけ SSE で結果を受け取る -->
+  <script th:if="${match == null}">
+    window.onload = function () {
+      var sse = new EventSource('/waitresult');
+      sse.onmessage = function (event) {
+        console.log(event.data);
+        var match = JSON.parse(event.data); // matches の1行が JSON で届く
+        document.getElementById("message").textContent = "対戦結果";
+        document.getElementById("kekka").innerHTML =
+          "あなたの手：" + match.user1Hand + "<br>" +
+          "相手の手：" + match.user2Hand + "<br>" +
+          "<a href=\"/janken\">戻る</a>";
+        sse.close(); // 結果を受け取ったら接続を閉じる（自動で再接続させない）
+      }
+    }
+  </script>
 </head>
 
 <body>
   <p>Hi [[${username}]]</p>
-  <p>相手の手を待ってます</p>
+
+  <!-- 後から手を出した側：その場で結果を表示 -->
+  <div th:if="${match}">
+    <p>対戦結果</p>
+    相手の手：[[${match.user1Hand}]]<br>
+    あなたの手：[[${match.user2Hand}]]<br>
+    <a href="/janken">戻る</a>
+  </div>
+
+  <!-- 待っている側：SSE で結果が届くとここが書き換わる -->
+  <div th:if="${match == null}">
+    <p id="message">相手の手を待ってます</p>
+    <div id="kekka"></div>
+  </div>
 </body>
 
 </html>
