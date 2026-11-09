@@ -8,6 +8,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.transaction.annotation.Transactional;
 
 import oit.is.z3692.kaizi.janken.model.Entry;
 import oit.is.z3692.kaizi.janken.model.Janken;
@@ -94,20 +95,39 @@ public class JankenController {
   }
 
   /**
-   * /wait?id=3&hand=Gu のように対戦相手のidと自分の手を受け取り，
-   * matchinfoテーブルに「自分のid・相手のid・自分の手・isActive=TRUE」を登録して，wait.htmlを表示する
+   * /wait?id=3&hand=Gu のように対戦相手のidと自分の手を受け取る
+   * - 相手が自分を待っている（相手→自分のmatchinfoがisActive=TRUE）なら試合成立：
+   *   matchesに「相手のid・自分のid・相手の手・自分の手・isActive=TRUE」を登録し，そのmatchinfoをisActive=FALSEにする
+   * - 待っていなければ：matchinfoに「自分のid・相手のid・自分の手・isActive=TRUE」を登録して待つ
    */
   @GetMapping("/wait")
+  @Transactional
   public String waitMatch(@RequestParam Integer id, @RequestParam String hand, Principal prin, ModelMap model) {
     String loginUser = prin.getName();
     User me = userMapper.selectByName(loginUser);
 
-    MatchInfo matchInfo = new MatchInfo();
-    matchInfo.setUser1(me.getId());
-    matchInfo.setUser2(id);
-    matchInfo.setUser1Hand(hand);
-    matchInfo.setIsActive(true);
-    matchInfoMapper.insertMatchInfo(matchInfo);
+    // 相手(id)が自分(me)を待っているmatchinfoを探す
+    MatchInfo waiting = matchInfoMapper.selectActiveByUsers(id, me.getId());
+
+    if (waiting == null) {
+      // 待っている相手がいない：自分が待つ側になる
+      MatchInfo matchInfo = new MatchInfo();
+      matchInfo.setUser1(me.getId());
+      matchInfo.setUser2(id);
+      matchInfo.setUser1Hand(hand);
+      matchInfo.setIsActive(true);
+      matchInfoMapper.insertMatchInfo(matchInfo);
+    } else {
+      // 試合成立：matchesに登録し，待っていたmatchinfoを終了にする
+      Match match = new Match();
+      match.setUser1(waiting.getUser1());
+      match.setUser2(me.getId());
+      match.setUser1Hand(waiting.getUser1Hand());
+      match.setUser2Hand(hand);
+      match.setIsActive(true);
+      matchMapper.insertMatch(match);
+      matchInfoMapper.updateInactiveById(waiting.getId());
+    }
 
     model.addAttribute("username", loginUser);
     return "wait.html";
